@@ -6,10 +6,14 @@ unit aimp_clockPlugin;
 interface
 
 uses
+  Windows,
   apiCore,
+  apiMenu,
   apiPlugin,
+  apiPlaylists,
   apiTypes,
   apiWrappers,
+  apiWrappersGUI,
   aimp_clockUI,
   AIMPCustomPlugin;
 
@@ -17,6 +21,11 @@ type
   TPlugin = class(TAIMPCustomPlugin, IAIMPExternalSettingsDialog)
   strict private
     FForm: TfrmClock;
+    FMenuItem: IAIMPMenuItem;
+
+    procedure RegisterAction;
+    procedure ToggleVisibility;
+    procedure UpdateMenuItem;
   protected
     function InfoGet(Index: Integer): PChar; override; stdcall;
     function Initialize(Core: IAIMPCore): HRESULT; override; stdcall;
@@ -37,8 +46,9 @@ procedure TPlugin.Finalize;
 var
   LConfig: TAIMPServiceConfig;
 begin
+  FMenuItem := nil;
   if FForm <> nil then
-  begin
+  try
     LConfig := ServiceGetConfig;
     try
       LConfig.WriteBool('Clock\Visible', FForm.Visible);
@@ -47,9 +57,9 @@ begin
     finally
       LConfig.Free;
     end;
+  finally
+    FreeAndNil(FForm);
   end;
-
-  FreeAndNil(FForm);
   inherited;
 end;
 
@@ -57,7 +67,7 @@ function TPlugin.InfoGet(Index: Integer): PChar;
 begin
   case Index of
     AIMP_PLUGIN_INFO_NAME:
-      Result := 'Clock v0.1b';
+      Result := 'Clock v0.2b';
     AIMP_PLUGIN_INFO_AUTHOR:
       Result := 'Artem Izmaylov';
     AIMP_PLUGIN_INFO_SHORT_DESCRIPTION:
@@ -77,10 +87,13 @@ var
   LBounds: string;
   LConfig: TAIMPServiceConfig;
 begin
-  Result := inherited;
-  if Result = 0 then
+  inherited;
+  if Supports(Core, IAIMPServicePlaylistManager) then // is it a player?
   begin
+    RegisterAction;
+
     FForm := TfrmClock.Create(nil);
+
     LConfig := ServiceGetConfig;
     try
       LBounds := LConfig.ReadString('Clock\Bounds');
@@ -91,13 +104,48 @@ begin
     finally
       LConfig.Free;
     end;
+
+    Result := S_OK;
+  end
+  else
+    Result := E_FAIL;
+end;
+
+procedure TPlugin.RegisterAction;
+var
+  LParentItem: IAIMPMenuItem;
+  LService: IAIMPServiceMenuManager;
+begin
+  if CoreGetService(IAIMPServiceMenuManager, LService) then
+  begin
+    CheckResult(CoreIntf.CreateObject(IID_IAIMPMenuItem, FMenuItem));
+    PropListSetStr(FMenuItem, AIMP_MENUITEM_PROPID_ID, 'aimp.clock.toggleUI');
+    PropListSetStr(FMenuItem, AIMP_MENUITEM_PROPID_NAME, 'Clock');
+    PropListSetObj(FMenuItem, AIMP_MENUITEM_PROPID_EVENT, uiWrap(ToggleVisibility));
+    PropListSetObj(FMenuItem, AIMP_MENUITEM_PROPID_EVENT_ONSHOW, uiWrap(UpdateMenuItem));
+    if Succeeded(LService.GetBuiltIn(AIMP_MENUID_PLAYER_MAIN_FUNCTIONS, LParentItem)) then
+    begin
+      PropListSetObj(FMenuItem, AIMP_MENUITEM_PROPID_PARENT, LParentItem);
+      CoreIntf.RegisterExtension(IAIMPServiceMenuManager, FMenuItem);
+    end;
   end;
 end;
 
 procedure TPlugin.Show(ParentWindow: HWND);
 begin
+  ToggleVisibility;
+end;
+
+procedure TPlugin.ToggleVisibility;
+begin
   if FForm <> nil then
     FForm.Visible := not FForm.Visible;
+end;
+
+procedure TPlugin.UpdateMenuItem;
+begin
+  if (FMenuItem <> nil) and (FForm <> nil) then
+    PropListSetBool(FMenuItem, AIMP_MENUITEM_PROPID_CHECKED, FForm.Visible)
 end;
 
 end.
