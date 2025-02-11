@@ -23,6 +23,7 @@ uses
   apiPlaylists,
   apiWrappers,
   // ACL
+  ACL.FileFormats.INI,
   ACL.Graphics,
   ACL.Timers,
   ACL.UI.Application,
@@ -67,6 +68,7 @@ type
   protected
     procedure CreateParams(var Params: TCreateParams); override;
   public
+    constructor Create(AOwner: TComponent); override;
     // Properties
     property Mode: Integer read FMode write SetMode;
   end;
@@ -93,6 +95,19 @@ begin
 end;
 
 { TfrmClock }
+
+constructor TfrmClock.Create(AOwner: TComponent);
+begin
+  inherited;
+  with TACLIniFile.Create('aimp_clock.ini', False) do
+  try
+    Color := TAlphaColor.FromString(ReadString('Clock', 'BackColor', 'FF000000')).ToColor;
+    Font.Color := TAlphaColor.FromString(ReadString('Clock', 'TextColor', 'FFFFFFFF')).ToColor;
+    Font.Name := ReadString('Clock', 'TextFont', 'Tahoma');
+  finally
+    Free;
+  end;
+end;
 
 function TfrmClock.ContentRect: TRect;
 begin

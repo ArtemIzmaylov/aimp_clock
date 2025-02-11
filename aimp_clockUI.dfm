@@ -14,7 +14,6 @@ object frmClock: TfrmClock
   Font.Height = -16
   Font.Name = 'Arial Black'
   Font.Style = [fsBold]
-  FormStyle = fsStayOnTop
   PopupMenu = Settings
   OnPaint = FormPaint
   OnResize = FormResize
