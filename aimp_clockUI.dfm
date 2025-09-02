@@ -35,6 +35,11 @@ object frmClock: TfrmClock
         AutoCheck = True
         Caption = 'Blink the colon'
       end
+      object miStayOnTop: TACLMenuItem
+        AutoCheck = True
+        Caption = 'Stay On Top'
+        OnClick = miStayOnTopClick
+      end
     end
     object miClock: TACLMenuItem
       Caption = 'Clock'

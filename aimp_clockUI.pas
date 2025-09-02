@@ -35,6 +35,9 @@ uses
   ACL.Utils.Strings;
 
 type
+
+  { TfrmClock }
+
   TfrmClock = class(TACLBasicForm)
     miAppUptime: TACLMenuItem;
     miBlinkColon: TACLMenuItem;
@@ -46,6 +49,7 @@ type
     miPlaylistElapsed: TACLMenuItem;
     miPlaylistRemaining: TACLMenuItem;
     miSettings: TACLMenuItem;
+    miStayOnTop: TACLMenuItem;
     miTrackElapsed: TACLMenuItem;
     miTrackRemaining: TACLMenuItem;
     Settings: TACLPopupMenu;
@@ -57,6 +61,7 @@ type
     procedure FormTimer(Sender: TObject);
     procedure miCloseClick(Sender: TObject);
     procedure miModeClick(Sender: TObject);
+    procedure miStayOnTopClick(Sender: TObject);
     procedure SettingsPopup(Sender: TObject);
   strict private
     FMode: Integer;
@@ -243,6 +248,53 @@ begin
   end;
 end;
 
+procedure TfrmClock.miModeClick(Sender: TObject);
+begin
+  SetMode(TComponent(Sender).Tag);
+end;
+
+procedure TfrmClock.miStayOnTopClick(Sender: TObject);
+begin
+  if miStayOnTop.Checked then
+    FormStyle := fsStayOnTop
+  else
+    FormStyle := fsNormal;
+end;
+
+procedure TfrmClock.miCloseClick(Sender: TObject);
+begin
+  Close;
+end;
+
+procedure TfrmClock.RestoreBounds(ABounds: TRect);
+var
+  LMonitorArea: TRect;
+begin
+  LMonitorArea := MonitorGet(ABounds.CenterPoint).BoundsRect;
+  ABounds.Height := EnsureRange(ABounds.Height, Constraints.MinHeight, LMonitorArea.Height);
+  ABounds.Width := EnsureRange(ABounds.Width, Constraints.MinWidth, LMonitorArea.Width);
+  ABounds := MonitorAlignPopupWindow(ABounds);
+  BoundsRect := ABounds;
+end;
+
+procedure TfrmClock.SetMode(AValue: Integer);
+begin
+  if FMode <> AValue then
+  begin
+    FMode := AValue;
+    FormTimer(nil);
+  end;
+end;
+
+procedure TfrmClock.SettingsPopup(Sender: TObject);
+var
+  I: Integer;
+begin
+  miStayOnTop.Checked := FormStyle = fsStayOnTop;
+  for I := 0 to Settings.Items.Count - 1 do
+    Settings.Items[I].Checked := Settings.Items[I].Tag = Mode;
+end;
+
 procedure TfrmClock.WMNCContextMenu(var Msg: TMessage);
 begin
   inherited;
@@ -284,44 +336,6 @@ procedure TfrmClock.WMNCHitTest(var Msg: TWMNCHitTest);
 
 begin
   Msg.Result := HitTest(Msg.Pos);
-end;
-
-procedure TfrmClock.miModeClick(Sender: TObject);
-begin
-  SetMode(TComponent(Sender).Tag);
-end;
-
-procedure TfrmClock.miCloseClick(Sender: TObject);
-begin
-  Close;
-end;
-
-procedure TfrmClock.RestoreBounds(ABounds: TRect);
-var
-  LMonitorArea: TRect;
-begin
-  LMonitorArea := MonitorGet(ABounds.CenterPoint).BoundsRect;
-  ABounds.Height := EnsureRange(ABounds.Height, Constraints.MinHeight, LMonitorArea.Height);
-  ABounds.Width := EnsureRange(ABounds.Width, Constraints.MinWidth, LMonitorArea.Width);
-  ABounds := MonitorAlignPopupWindow(ABounds);
-  BoundsRect := ABounds;
-end;
-
-procedure TfrmClock.SetMode(AValue: Integer);
-begin
-  if FMode <> AValue then
-  begin
-    FMode := AValue;
-    FormTimer(nil);
-  end;
-end;
-
-procedure TfrmClock.SettingsPopup(Sender: TObject);
-var
-  I: Integer;
-begin
-  for I := 0 to Settings.Items.Count - 1 do
-    Settings.Items[I].Checked := Settings.Items[I].Tag = Mode;
 end;
 
 end.

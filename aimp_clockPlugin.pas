@@ -38,7 +38,7 @@ type
 implementation
 
 uses
-  SysUtils, ACL.Utils.Strings;
+  Forms, SysUtils, ACL.Utils.Strings;
 
 { TPlugin }
 
@@ -53,6 +53,7 @@ begin
     try
       LConfig.WriteString('Clock\Bounds', acRectToString(FForm.BoundsRect));
       LConfig.WriteBool('Clock\Blinking', FForm.miBlinkColon.Checked);
+      LConfig.WriteBool('Clock\StayOnTop', FForm.FormStyle = fsStayOnTop);
       LConfig.WriteBool('Clock\Visible', FForm.Visible);
       LConfig.WriteInteger('Clock\Mode', FForm.Mode);
     finally
@@ -88,29 +89,27 @@ var
   LBounds: string;
   LConfig: TAIMPServiceConfig;
 begin
-  inherited;
-  if Supports(Core, IAIMPServicePlaylistManager) then // is it a player?
-  begin
-    RegisterAction;
+  if not Supports(Core, IAIMPServicePlaylistManager) then // Is it a player?
+    Exit(E_FAIL);
 
-    FForm := TfrmClock.Create(nil);
+  Result := inherited;
+  RegisterAction;
 
-    LConfig := ServiceGetConfig;
-    try
-      LBounds := LConfig.ReadString('Clock\Bounds');
-      if LBounds <> '' then
-        FForm.RestoreBounds(acStringToRect(LBounds));
-      FForm.miBlinkColon.Checked := LConfig.ReadBool('Clock\Blinking', True);
-      FForm.Mode := LConfig.ReadInteger('Clock\Mode');
-      FForm.Visible := LConfig.ReadBool('Clock\Visible', True); // last
-    finally
-      LConfig.Free;
-    end;
+  FForm := TfrmClock.Create(nil);
 
-    Result := S_OK;
-  end
-  else
-    Result := E_FAIL;
+  LConfig := ServiceGetConfig;
+  try
+    LBounds := LConfig.ReadString('Clock\Bounds');
+    if LBounds <> '' then
+      FForm.RestoreBounds(acStringToRect(LBounds));
+    if LConfig.ReadBool('Clock\StayOnTop', True) then
+      FForm.FormStyle := fsStayOnTop;
+    FForm.miBlinkColon.Checked := LConfig.ReadBool('Clock\Blinking', True);
+    FForm.Mode := LConfig.ReadInteger('Clock\Mode');
+    FForm.Visible := LConfig.ReadBool('Clock\Visible', True); // last
+  finally
+    LConfig.Free;
+  end;
 end;
 
 procedure TPlugin.RegisterAction;
