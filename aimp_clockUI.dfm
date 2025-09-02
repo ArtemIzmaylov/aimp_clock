@@ -28,6 +28,14 @@ object frmClock: TfrmClock
     OnPopup = SettingsPopup
     Left = 56
     Top = 8
+    object miSettings: TACLMenuItem
+      Tag = -1
+      Caption = 'Settings'
+      object miBlinkColon: TACLMenuItem
+        AutoCheck = True
+        Caption = 'Blink the colon'
+      end
+    end
     object miClock: TACLMenuItem
       Caption = 'Clock'
       RadioItem = True

@@ -51,8 +51,9 @@ begin
   try
     LConfig := ServiceGetConfig;
     try
-      LConfig.WriteBool('Clock\Visible', FForm.Visible);
       LConfig.WriteString('Clock\Bounds', acRectToString(FForm.BoundsRect));
+      LConfig.WriteBool('Clock\Blinking', FForm.miBlinkColon.Checked);
+      LConfig.WriteBool('Clock\Visible', FForm.Visible);
       LConfig.WriteInteger('Clock\Mode', FForm.Mode);
     finally
       LConfig.Free;
@@ -99,8 +100,9 @@ begin
       LBounds := LConfig.ReadString('Clock\Bounds');
       if LBounds <> '' then
         FForm.RestoreBounds(acStringToRect(LBounds));
-      FForm.Visible := LConfig.ReadBool('Clock\Visible', True);
+      FForm.miBlinkColon.Checked := LConfig.ReadBool('Clock\Blinking', True);
       FForm.Mode := LConfig.ReadInteger('Clock\Mode');
+      FForm.Visible := LConfig.ReadBool('Clock\Visible', True); // last
     finally
       LConfig.Free;
     end;

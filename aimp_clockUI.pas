@@ -36,6 +36,7 @@ uses
 
 type
   TfrmClock = class(TACLBasicForm)
+    miBlinkColon: TACLMenuItem;
     miClock: TACLMenuItem;
     miClose: TACLMenuItem;
     miLine1: TACLMenuItem;
@@ -43,6 +44,7 @@ type
     miLine3: TACLMenuItem;
     miPlaylistElapsed: TACLMenuItem;
     miPlaylistRemaining: TACLMenuItem;
+    miSettings: TACLMenuItem;
     miTrackElapsed: TACLMenuItem;
     miTrackRemaining: TACLMenuItem;
     Settings: TACLPopupMenu;
@@ -58,6 +60,7 @@ type
   strict private
     FMode: Integer;
     FTime: Int64;
+    FTimeColon: Boolean;
 
     function ContentRect: TRect;
     function FetchTime: Int64;
@@ -86,15 +89,15 @@ uses
 const
   NoValue: Int64 = -1;
 
-function FormatTime(const ATime: Int64): string;
+function FormatTime(ATime: Int64; AShowColon: Boolean = True): string;
 begin
   if ATime = NoValue then
     Result := '--:--:--'
   else
     Result := TACLTimeFormat.Format(ATime * 1000, [ftpSeconds..ftpHours], False);
 
-  if ATime mod 2 = 0 then
-    Result := acStringReplace(Result, ':', ' ');
+  if not AShowColon then
+    Result := Result.Replace(':', ' ');
 end;
 
 { TfrmClock }
@@ -175,7 +178,7 @@ end;
 procedure TfrmClock.FormPaint(Sender: TObject);
 begin
   Canvas.Font := Font;
-  acTextDraw(Canvas, FormatTime(FTime), ContentRect, taCenter, taVerticalCenter);
+  acTextDraw(Canvas, FormatTime(FTime, FTimeColon), ContentRect, taCenter, taVerticalCenter);
 end;
 
 procedure TfrmClock.FormResize(Sender: TObject);
@@ -213,13 +216,18 @@ end;
 procedure TfrmClock.FormTimer(Sender: TObject);
 var
   LTime: Int64;
+  LTimeColon: Boolean;
 begin
   if Visible then
   begin
     LTime := FetchTime;
-    if LTime <> FTime then
+    LTimeColon := FTimeColon;
+    if Sender <> nil then
+      LTimeColon := not (miBlinkColon.Checked and LTimeColon);
+    if (LTime <> FTime) or (LTimeColon <> FTimeColon) then
     begin
       FTime := LTime;
+      FTimeColon := LTimeColon;
       Invalidate;
     end;
   end;
