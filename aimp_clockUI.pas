@@ -36,6 +36,7 @@ uses
 
 type
   TfrmClock = class(TACLBasicForm)
+    miAppUptime: TACLMenuItem;
     miBlinkColon: TACLMenuItem;
     miClock: TACLMenuItem;
     miClose: TACLMenuItem;
@@ -54,8 +55,8 @@ type
     procedure FormPaint(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormTimer(Sender: TObject);
-    procedure miClockClick(Sender: TObject);
     procedure miCloseClick(Sender: TObject);
+    procedure miModeClick(Sender: TObject);
     procedure SettingsPopup(Sender: TObject);
   strict private
     FMode: Integer;
@@ -77,6 +78,9 @@ type
     procedure RestoreBounds(ABounds: TRect);
     // Properties
     property Mode: Integer read FMode write SetMode;
+  public
+    class var StartTime: TDateTime;
+    class constructor Create;
   end;
 
 implementation
@@ -101,6 +105,11 @@ begin
 end;
 
 { TfrmClock }
+
+class constructor TfrmClock.Create;
+begin
+  StartTime := Now;
+end;
 
 constructor TfrmClock.Create(AOwner: TComponent);
 begin
@@ -172,6 +181,7 @@ begin
     2: FetchPlayingTrackTime(Result, True);
     3: FetchPlayingPlaylistTime(Result, False);
     4: FetchPlayingPlaylistTime(Result, True);
+    5: Result := TACLDateUtils.DateTimeToSeconds(Now - StartTime);
   end;
 end;
 
@@ -276,7 +286,7 @@ begin
   Msg.Result := HitTest(Msg.Pos);
 end;
 
-procedure TfrmClock.miClockClick(Sender: TObject);
+procedure TfrmClock.miModeClick(Sender: TObject);
 begin
   SetMode(TComponent(Sender).Tag);
 end;

@@ -39,7 +39,13 @@ object frmClock: TfrmClock
     object miClock: TACLMenuItem
       Caption = 'Clock'
       RadioItem = True
-      OnClick = miClockClick
+      OnClick = miModeClick
+    end
+    object miAppUptime: TACLMenuItem
+      Tag = 5
+      Caption = 'App uptime'
+      RadioItem = True
+      OnClick = miModeClick
     end
     object miLine1: TACLMenuItem
       Caption = '-'
@@ -48,13 +54,13 @@ object frmClock: TfrmClock
       Tag = 1
       Caption = 'Track Elapsed'
       RadioItem = True
-      OnClick = miClockClick
+      OnClick = miModeClick
     end
     object miTrackRemaining: TACLMenuItem
       Tag = 2
       Caption = 'Track Remaining'
       RadioItem = True
-      OnClick = miClockClick
+      OnClick = miModeClick
     end
     object miLine2: TACLMenuItem
       Caption = '-'
@@ -63,13 +69,13 @@ object frmClock: TfrmClock
       Tag = 3
       Caption = 'Playlist Elapsed'
       RadioItem = True
-      OnClick = miClockClick
+      OnClick = miModeClick
     end
     object miPlaylistRemaining: TACLMenuItem
       Tag = 4
       Caption = 'Playlist Remaining'
       RadioItem = True
-      OnClick = miClockClick
+      OnClick = miModeClick
     end
     object miLine3: TACLMenuItem
       Caption = '-'
