@@ -103,7 +103,7 @@ begin
   try
     Color := TAlphaColor.FromString(ReadString('Clock', 'BackColor', 'FF000000')).ToColor;
     Font.Color := TAlphaColor.FromString(ReadString('Clock', 'TextColor', 'FFFFFFFF')).ToColor;
-    Font.Name := ReadString('Clock', 'TextFont', 'Tahoma');
+    Font.Name := ReadString('Clock', 'TextFont', 'Consolas');
   finally
     Free;
   end;
@@ -171,6 +171,7 @@ end;
 
 procedure TfrmClock.FormPaint(Sender: TObject);
 begin
+  Canvas.Font := Font;
   acTextDraw(Canvas, FormatTime(FTime), ContentRect, taCenter, taVerticalCenter);
 end;
 
@@ -183,6 +184,7 @@ var
   LSize: TSize;
   LText: string;
 begin
+  Canvas.Font := Font;
   LRect := ContentRect;
   LFontOpt := 0;
   LFontMin := 1;
