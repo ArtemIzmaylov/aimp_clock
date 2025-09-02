@@ -98,7 +98,7 @@ begin
     try
       LBounds := LConfig.ReadString('Clock\Bounds');
       if LBounds <> '' then
-        FForm.BoundsRect := acStringToRect(LBounds);
+        FForm.RestoreBounds(acStringToRect(LBounds));
       FForm.Visible := LConfig.ReadBool('Clock\Visible', True);
       FForm.Mode := LConfig.ReadInteger('Clock\Mode');
     finally

@@ -10,6 +10,7 @@ uses
   Windows,
   // System
   Classes,
+  Math,
   SysUtils,
   // Vcl
   Controls,
@@ -30,6 +31,7 @@ uses
   ACL.UI.Forms.Base,
   ACL.UI.Menus,
   ACL.Utils.Date,
+  ACL.Utils.Desktop,
   ACL.Utils.Strings;
 
 type
@@ -69,6 +71,7 @@ type
     procedure CreateParams(var Params: TCreateParams); override;
   public
     constructor Create(AOwner: TComponent); override;
+    procedure RestoreBounds(ABounds: TRect);
     // Properties
     property Mode: Integer read FMode write SetMode;
   end;
@@ -273,6 +276,17 @@ end;
 procedure TfrmClock.miCloseClick(Sender: TObject);
 begin
   Close;
+end;
+
+procedure TfrmClock.RestoreBounds(ABounds: TRect);
+var
+  LMonitorArea: TRect;
+begin
+  LMonitorArea := MonitorGet(ABounds.CenterPoint).BoundsRect;
+  ABounds.Height := EnsureRange(ABounds.Height, Constraints.MinHeight, LMonitorArea.Height);
+  ABounds.Width := EnsureRange(ABounds.Width, Constraints.MinWidth, LMonitorArea.Width);
+  ABounds := MonitorAlignPopupWindow(ABounds);
+  BoundsRect := ABounds;
 end;
 
 procedure TfrmClock.SetMode(AValue: Integer);
